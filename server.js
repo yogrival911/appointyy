@@ -6,6 +6,7 @@ const bcrypt = require("bcryptjs");
 const User = require("./models/userModel");
 const userRoutes = require("./routes/userRoutes");
 const clinicRoutes = require("./routes/clinicRoutes");
+const { sendTextMessage, sendTemplateMessage, sendTimeSlotOptions } = require("./controllers/whatsappService");
 
 dotenv.config();
  connectDB();
@@ -29,10 +30,55 @@ app.get('/', (req, res) => {
 });
 
 // Route for POST requests
-app.post('/', (req, res) => {
+app.post('/', async (req, res)  => {
   const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
   console.log(`\n\nWebhook received ${timestamp}\n`);
   console.log(JSON.stringify(req.body, null, 2));
+
+ // Example: auto-reply if it's a text message
+ const entry = req.body.entry?.[0];
+  const changes = entry?.changes?.[0];
+  const message = changes?.value?.messages?.[0];
+  const contact = changes?.value?.contacts?.[0];
+  const value = changes?.value;
+  // Ignore delivery/read receipts
+if (value?.statuses) {
+  console.log("Status update, no reply needed.");
+  return res.status(200).end();
+}
+ if (message && message.type === "text" && message.text?.body) {
+  const from = message.from;
+  const name = contact?.profile?.name || "there";
+  // Text mss
+  // await sendTextMessage(from, `Hello ${name}, you said: ${message.text.body}`);
+
+  // template msg
+  // await sendTemplateMessage(from, "hello_world"); 
+
+  // slot msg
+  const slots = ["10:00 AM", "11:30 AM", "2:00 PM"];
+  sendTimeSlotOptions(from, slots);
+  
+  //  const reply = {
+  //    messaging_product: "whatsapp",
+  //    to: from,
+  //    text: { body: `Hello ${contact.profile.name}! Thanks for your msg 🙌` }
+  //  };
+
+  //  const res = await fetch(`https://graph.facebook.com/v21.0/${process.env.PHONE_NUMBER_ID}/messages`, {
+  //    method: "POST",
+  //    headers: {
+  //      "Authorization": `Bearer ${process.env.WHATSAPP_TOKEN}`,
+  //      "Content-Type": "application/json"
+  //    },
+  //    body: JSON.stringify(reply)
+  //  });
+
+//    const data = await res.json();
+// console.log("WhatsApp API response:", data);
+ }
+
+
   res.status(200).end();
 });
 
