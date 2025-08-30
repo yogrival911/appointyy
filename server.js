@@ -50,14 +50,25 @@ if (value?.statuses) {
   const from = message.from;
   const name = contact?.profile?.name || "there";
   // Text mss
-  // await sendTextMessage(from, `Hello ${name}, you said: ${message.text.body}`);
+  if(message.text?.body === "Hi"){
+    await sendTextMessage(from, `Hello ${name}, Welcome to Lycra Salon. How can I help you?`);
+  }else if(message.text?.body === "I want to book an appointment"){
+  // template msg
+  // await sendTemplateMessage(from, "hello_world"); 
+  // slot msg
+  const slots = ["10:00 AM", "11:30 AM", "2:00 PM"];
+  sendTimeSlotOptions(from, slots);
+  }else{
+    await sendTextMessage(from, `Your appointment is confirmed for 11:30 AM`);
+
+  }
 
   // template msg
   // await sendTemplateMessage(from, "hello_world"); 
 
   // slot msg
-  const slots = ["10:00 AM", "11:30 AM", "2:00 PM"];
-  sendTimeSlotOptions(from, slots);
+  // const slots = ["10:00 AM", "11:30 AM", "2:00 PM"];
+  // sendTimeSlotOptions(from, slots);
   
   //  const reply = {
   //    messaging_product: "whatsapp",
